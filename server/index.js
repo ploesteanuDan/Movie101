@@ -14,9 +14,20 @@ const db = mysql.createConnection({
     database: 'moviesandproducers',
   });
 
-app.get('/get', (req, res)=>{
-    const table = req.body.table
-   db.query("SELECT * FROM " + table, (err, result) => {
+app.get('/movies', (req, res)=>{
+    const isBanner = req.query.isBanner
+    db.query("SELECT * FROM movies WHERE isBanner = " + isBanner, (err, result) => {
+       if(err){
+           console.log(err)
+       }
+       else {
+           res.send(result)
+       }
+   })
+})
+
+app.get('/producers', (req, res)=>{
+    db.query("SELECT * FROM producers", (err, result) => {
        if(err){
            console.log(err)
        }
@@ -26,16 +37,13 @@ app.get('/get', (req, res)=>{
    })
 })
  
-app.post('/add/gallery', (req, res) => {
+app.post('/studios', (req, res) => {
     const movieID = req.body.movieID
     const producerID = req.body.producerID
-    const year = req.body.year
-    const title = req.body.title
-    const thumbnail = req.body.thumbnail
-    const trailer = req.body.trailer
+    const studioName = req.body.studioName
 
-    db.query('INSERT INTO gallery (movieID, producerID, movieTitle, movieYear, galleryThumbnail, galleryTrailer) VALUES (?,?,?,?,?,?)',
-    [movieID, producerID, title, year, thumbnail, trailer],
+    db.query('INSERT INTO studios (movieID, producerID, studioName) VALUES (?,?,?)',
+    [movieID, producerID, studioName],
     (err, result) => {
         if(err){
             console.log(err)
@@ -50,14 +58,17 @@ app.post('/add/gallery', (req, res) => {
 })
 
  //ADD MOVIES
-app.post('/add/movie', (req, res) => {
-    const title = req.body.title
+app.post('/movies', (req, res) => {
+    const name = req.body.name
     const year = req.body.year
     const type = req.body.type
     const plot = req.body.plot
+    const thumbnail = req.body.thumbnail
+    const trailer = req.body.trailer
+    const banner = req.body.banner
 
-    db.query('INSERT INTO movies (movieTitle, movieYear, movieType, moviePlot) VALUES (?,?,?,?)', 
-    [title, year, type, plot], 
+    db.query('INSERT INTO movies (name, year, type, plot, thumbnail, trailer, isBanner, banner) VALUES (?,?,?,?,?,?,1,?)', 
+    [name, year, type, plot, thumbnail, trailer,banner], 
     (err, result) => {
         if (err) {
             console.log(err)
@@ -71,13 +82,14 @@ app.post('/add/movie', (req, res) => {
 })
  
  //ADD PRODUCERS
-app.post('/add/producer', (req, res) => {
+app.post('/producers', (req, res) => {
     const name = req.body.name
     const born = req.body.born
     const nationality = req.body.nationality
+    const thumbnail = req.body.thumbnail
 
-    db.query('INSERT INTO producers (producerName, producerBorn, producerNationality) VALUES (?,?,?)', 
-    [name, born, nationality], 
+    db.query('INSERT INTO producers (name, born, nationality, thumbnail) VALUES (?,?,?.?)', 
+    [name, born, nationality, thumbnail], 
     (err, result) => {
         if (err) {
             console.log(err)
@@ -89,7 +101,6 @@ app.post('/add/producer', (req, res) => {
 })
  
 app.put('/update', (req, res)=>{
-    console.log(req.body)
     const table = req.body.table
     const valName = req.body.valName
     const newVal = req.body.newVal
